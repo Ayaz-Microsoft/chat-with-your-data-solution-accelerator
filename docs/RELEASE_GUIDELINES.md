@@ -12,21 +12,21 @@ This repository uses GitHub's in-built [Releases](https://docs.github.com/en/rep
 
 # Automated releases
 
-In order to automate the generation of a change log, the creation of a release, and the bumping of a version number, we use the [Conventional Changelog Action](https://github.com/TriPSs/conventional-changelog-action).
+In order to automate the generation of a change log, the creation of a release, and the bumping of a version number, we use [semantic-release](https://github.com/semantic-release/semantic-release).
 
 It works by inferring from the commit history what changes have been made, and hence what version should be assigned. This is why it is important for Pull Request titles to adhere to the [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) specification, which many repositories use. This convention uses types such as `docs`, `fix`, `feat`, etc to label commits and PRs.
 
 From these, the [semantic version](https://semver.org/) of a release can be identified. For example a release which consists of a PR which adds a feature (`feat`) would result in an increment of the Minor part of the semantic version, e.g. 1.1.0 -> 1.2.0.
 
-Using the Conventional Changelog Action along with GitHub Releases takes all of the manual work out of creating a release.
+Using semantic-release along with GitHub Releases takes all of the manual work out of creating a release.
 
-# Conventional Changelog Action
+# semantic-release
 
 ## Usage
 
-We use the [Conventional Changelog](https://github.com/TriPSs/conventional-changelog-action) GitHub Action, which you can find in `./github/workflows/create-release.yml`.
+We use [semantic-release](https://github.com/semantic-release/semantic-release), invoked via `npx` in `./github/workflows/create-release.yml`. Its behaviour is configured in the repository root `.releaserc.json`.
 
-Once a PR is merged to `main`, the Action will automatically run. It will automatically generate a changelog, and if that changelog is empty, then no release is made. This would be the case for merges to `main` that include `docs`, `chore`, etc.
+Once the `Validate Deployment` workflow completes successfully on `main`, the Action will automatically run. It will automatically generate a changelog, and if that changelog is empty, then no release is made. This would be the case for merges to `main` that include `docs`, `chore`, etc.
 
 Once a merge to `main` is completed that would result in a major/minor/patch version increase (such as `feat`, `fix`, etc.) then a changelog will be generated, and this will trigger a release to be published automatically with the appropriate version number.
 
