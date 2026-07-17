@@ -6,6 +6,7 @@ on:
 
 permissions:
   contents: write
+  issues: write
   pull-requests: write
 
 name: Create-Release
@@ -21,13 +22,9 @@ jobs:
         with:
           ref: ${{ github.event.workflow_run.head_sha }}
           fetch-depth: 0
+          fetch-tags: true
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-
-      - name: Run semantic-release
-        run: npx -p semantic-release@22 -p conventional-changelog-conventionalcommits@7 semantic-release
+      - name: Create release
+        run: bash .github/scripts/release.sh
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
