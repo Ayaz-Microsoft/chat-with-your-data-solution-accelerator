@@ -194,6 +194,17 @@ echo "----- Release notes -----"
 printf '%s\n' "$notes"
 echo "-------------------------"
 
+# --- Dry-run: report what would happen without publishing anything ---
+if [[ "${DRY_RUN:-false}" == "true" ]]; then
+  echo "DRY RUN: would create release ${tag} at ${SHA}."
+  if (( ${#referenced_prs[@]} > 0 )); then
+    echo "DRY RUN: would add the 'released' label and an inclusion comment to: ${!referenced_prs[*]}"
+  fi
+  set_output "new-release-published" "true"
+  set_output "release-version" "${next}"
+  exit 0
+fi
+
 # --- Create the GitHub Release (also creates the tag at SHA) ---
 payload=$(printf '{"tag_name":"%s","target_commitish":"%s","name":"%s","body":"%s","draft":false,"prerelease":false}' \
   "$tag" "$SHA" "$tag" "$(json_escape "$notes")")
