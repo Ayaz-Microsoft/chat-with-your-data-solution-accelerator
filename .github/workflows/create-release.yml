@@ -3,7 +3,6 @@ on:
     workflows: ["Validate Deployment"]
     types:
       - completed
-  workflow_dispatch:
 
 permissions:
   contents: write
@@ -20,17 +19,16 @@ jobs:
     # from ever checking out and executing attacker-controlled code from a
     # fork PR head (CodeQL: actions/untrusted-checkout).
     if: >-
-      ${{ github.event_name == 'workflow_dispatch' ||
-          (github.event.workflow_run.conclusion == 'success' &&
-           github.event.workflow_run.event != 'pull_request' &&
-           github.event.workflow_run.head_repository.full_name == github.repository) }}
+      ${{ github.event.workflow_run.conclusion == 'success' &&
+          github.event.workflow_run.event != 'pull_request' &&
+          github.event.workflow_run.head_repository.full_name == github.repository }}
 
     steps:
       - name: Checkout
         # SHA-pinned to actions/checkout v6 (d23441a) for supply-chain safety.
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
-          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+          ref: ${{ github.event.workflow_run.head_sha }}
           fetch-depth: 0
           fetch-tags: true
 
