@@ -36,7 +36,7 @@ __all__ = [
 
 logger = logging.getLogger(__name__)
 
-# Operator-facing reason string returned when the RAI classifier
+# Operator facing reason string returned when the RAI classifier
 # rejects a submitted prompt. Single sentence so the FE can surface
 # it inline next to the field without truncation; intentionally
 # generic (no per-category enumeration) because `RAI_AGENT` is a

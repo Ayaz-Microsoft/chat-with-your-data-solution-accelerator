@@ -36,8 +36,9 @@ flowchart LR
   BE --> FDRY[Azure AI Foundry<br/>models + retrieval]
   BE --> CS[Content Safety]
   BE --> SPX[Speech]
-  BE --> STORE[(Azure Storage<br/>blobs + queues)]
-  STORE --> EG[Event Grid] --> FN
+  BE -->|upload + enqueue| STORE[(Azure Storage<br/>blobs + queues)]
+  STORE -->|queue trigger| FN
+  STORE -.optional Event Grid.-> FN
   FN --> FDRY
   subgraph STORES[Retrieval + chat history: deploy-time choice]
     direction TB
@@ -85,33 +86,32 @@ You ask a question in natural language. The backend retrieves the most relevant 
 - Responses are grounded in your indexed content with inline citations back to the source documents.
 - Upload files or index public web pages through a document ingestion pipeline that parses, chunks, and embeds many [supported file types](docs/supported_file_types.md).
 - Choose Azure AI Search with Cosmos DB or PostgreSQL with pgvector as your retrieval and persistence engine, selected at deploy time.
+- Choose between two interchangeable orchestrators, Agent Framework or LangGraph, that share the same retrieval and grounding pipeline and are selected at deploy time.
+- A collapsible reasoning panel shows the model's intermediate steps alongside the answer as they stream in.
+- Azure AI Content Safety screens prompts and responses to help keep the experience within your policy boundaries.
 - A single user-assigned managed identity and Azure RBAC authorize every downstream call, with no Key Vault and no application secrets to manage. See [Managed identity and RBAC](docs/managed_identity.md).
 - A single-page chat interface streams answers to the browser and retains [chat history](docs/chat_history.md) across sessions.
 - An [admin experience](docs/admin.md) lets you ingest, inspect, and configure your dataset and prompts without touching code.
 - Voice input is available through [speech-to-text](docs/speech_to_text.md) on any supported browser.
+- Optional end-user sign-in secures the web app through Microsoft Entra ID. See [Authentication setup](docs/authentication_setup.md).
 
 </details>
 
 <br/>
 
-## Quick deploy
+The "Deploy to Azure" button offers a one-click deployment where you don’t have to clone the code. If you would like a developer experience instead, follow the [local deployment instructions](./docs/LOCAL_DEPLOYMENT.md)
 
-### How to install or deploy
+Once you deploy to Azure, you will have the option to select PostgreSQL or Cosmos DB, see screenshot below.
 
-Follow the quick deploy steps on the deployment guide to deploy this solution to your own Azure subscription. [Click here to launch the deployment guide](docs/DeploymentGuide.md)
+[![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FAzure-Samples%2Fchat-with-your-data-solution-accelerator%2Frefs%2Fheads%2Fmain%2Finfra%2Fmain.json)
 
-| [![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/Azure-Samples/chat-with-your-data-solution-accelerator) | [![Open in Dev Containers](https://img.shields.io/static/v1?style=for-the-badge&label=Dev%20Containers&message=Open&color=blue&logo=visualstudiocode)](https://vscode.dev/redirect?url=vscode://ms-vscode-remote.remote-containers/cloneInVolume?url=https://github.com/Azure-Samples/chat-with-your-data-solution-accelerator) | [![Open in Visual Studio Code (Web)](https://img.shields.io/static/v1?style=for-the-badge&label=Visual%20Studio%20Code%20%28Web%29&message=Open&color=blue&logo=visualstudiocode&logoColor=white)](https://vscode.dev/github/Azure-Samples/chat-with-your-data-solution-accelerator) |
-|---|---|---|
+Select either "PostgreSQL" or "Cosmos DB":
+![Solution Architecture - DB Selection](/docs/images/db_selection.png)
 
-> [!NOTE]
-> Some tenants may have additional security restrictions that run periodically and could impact the application (for example, blocking public network access). If you experience issues or the application stops working, check if these restrictions are the cause. Consider deploying the WAF-supported version to ensure compliance. To configure, see the [post-deployment hardening guide](docs/AVMPostDeploymentGuide.md).
 
-> [!IMPORTANT]
-> Check Azure OpenAI quota availability before deploying. Follow the [quota check instructions guide](docs/QuotaCheck.md) to confirm sufficient capacity in your subscription.
+**When Deployment is complete:**
 
-### Clean up
-
-Remove every resource this accelerator created:
+1. Run the post-deployment setup script to configure the Function App client key and create PostgreSQL tables (if applicable). Open [Azure Cloud Shell](https://shell.azure.com) (Bash) and run:
 
 ```bash
 azd down
